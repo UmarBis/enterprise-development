@@ -21,10 +21,10 @@ jobs:
           dotnet-quality: 'preview'
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore tests/FitnessClub.Tests/FitnessClub.Tests.csproj
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build tests/FitnessClub.Tests/FitnessClub.Tests.csproj --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test --no-build --configuration Release --verbosity normal
+        run: dotnet test tests/FitnessClub.Tests/FitnessClub.Tests.csproj --no-build --configuration Release --verbosity normal
