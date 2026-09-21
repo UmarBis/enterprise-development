@@ -1,5 +1,3 @@
-using FitnessClub.Tests.Fixtures;
-
 namespace FitnessClub.Tests;
 
 /// <summary>

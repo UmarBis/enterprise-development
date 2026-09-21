@@ -1,5 +1,4 @@
 using FitnessClub.Domain.Enums;
-using FitnessClub.Tests.Fixtures;
 
 namespace FitnessClub.Tests;
 
