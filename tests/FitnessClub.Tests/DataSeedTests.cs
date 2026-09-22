@@ -1,75 +1,74 @@
+using FitnessClub.Domain.Enums;
+
 namespace FitnessClub.Tests;
 
 /// <summary>
-/// Проверки того, что сидер создаёт корректное количество связанных данных.
+/// Проверки корректности генерации тестовых данных.
 /// </summary>
 /// <param name="fixture">Общая фикстура с тестовыми данными.</param>
 public class DataSeedTests(QueriesTestFixture fixture) : IClassFixture<QueriesTestFixture>
 {
-    /// <summary>
-    /// Сидер должен создавать не менее 10 экземпляров каждого класса.
-    /// </summary>
+    /// <summary>Сидер создаёт не менее 10 экземпляров каждого класса.</summary>
     [Fact]
     public void DataSeedShouldContainAtLeast10OfEach()
     {
         // Assert
         Assert.True(fixture.Clients.Count >= 10);
-        Assert.True(fixture.Memberships.Count >= 10);
         Assert.True(fixture.Trainers.Count >= 10);
-        Assert.True(fixture.Workouts.Count >= 10);
-        Assert.True(fixture.Visits.Count >= 10);
+        Assert.True(fixture.Bookings.Count >= 10);
+        Assert.True(fixture.Specializations.Count >= 10);
     }
 
-    /// <summary>
-    /// Все абонементы должны ссылаться на существующего клиента.
-    /// </summary>
+    /// <summary>У каждого тренера специализация ссылается на существующий справочник.</summary>
     [Fact]
-    public void EveryMembershipShouldReferenceExistingClient()
+    public void EveryTrainerHasValidSpecialization()
     {
         // Arrange
-        var clientIds = fixture.Clients.Select(c => c.Id).ToHashSet();
+        var specIds = fixture.Specializations.Select(s => s.Id).ToHashSet();
 
         // Act
-        var orphans = fixture.Memberships
-            .Where(m => !clientIds.Contains(m.ClientId))
-            .ToList();
+        var broken = fixture.Trainers.Where(t => !specIds.Contains(t.SpecializationId)).ToList();
 
         // Assert
-        Assert.Empty(orphans);
+        Assert.Empty(broken);
     }
 
-    /// <summary>
-    /// Все посещения должны ссылаться на существующих клиентов и тренировки.
-    /// </summary>
+    /// <summary>Каждая запись ссылается на существующих клиента и тренера.</summary>
     [Fact]
-    public void EveryVisitShouldReferenceExistingEntities()
+    public void EveryBookingReferencesExistingEntities()
     {
         // Arrange
-        var clientIds = fixture.Clients.Select(c => c.Id).ToHashSet();
-        var workoutIds = fixture.Workouts.Select(w => w.Id).ToHashSet();
+        var clientIds  = fixture.Clients.Select(c => c.Id).ToHashSet();
+        var trainerIds = fixture.Trainers.Select(t => t.Id).ToHashSet();
 
         // Act
-        var broken = fixture.Visits
-            .Where(v => !clientIds.Contains(v.ClientId) || !workoutIds.Contains(v.WorkoutId))
+        var broken = fixture.Bookings
+            .Where(b => !clientIds.Contains(b.ClientId) || !trainerIds.Contains(b.TrainerId))
             .ToList();
 
         // Assert
         Assert.Empty(broken);
     }
 
-    /// <summary>
-    /// Все тренировки должны ссылаться на существующего тренера.
-    /// </summary>
+    /// <summary>Есть и мужчины, и женщины среди клиентов и тренеров.</summary>
     [Fact]
-    public void EveryWorkoutShouldReferenceExistingTrainer()
+    public void BothGendersArePresent()
     {
-        // Arrange
-        var trainerIds = fixture.Trainers.Select(t => t.Id).ToHashSet();
-
         // Act
-        var broken = fixture.Workouts
-            .Where(w => !trainerIds.Contains(w.TrainerId))
-            .ToList();
+        var clientHasBoth  = fixture.Clients.Any(c => c.Gender == Gender.Male) && fixture.Clients.Any(c => c.Gender == Gender.Female);
+        var trainerHasBoth = fixture.Trainers.Any(t => t.Gender == Gender.Male) && fixture.Trainers.Any(t => t.Gender == Gender.Female);
+
+        // Assert
+        Assert.True(clientHasBoth);
+        Assert.True(trainerHasBoth);
+    }
+
+    /// <summary>Все записи имеют заполненное название зала.</summary>
+    [Fact]
+    public void EveryBookingHasHallName()
+    {
+        // Act
+        var broken = fixture.Bookings.Where(b => string.IsNullOrWhiteSpace(b.HallName)).ToList();
 
         // Assert
         Assert.Empty(broken);
