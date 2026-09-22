@@ -7,32 +7,26 @@ namespace FitnessClub.Tests.Fixtures;
 /// </summary>
 public class QueriesTestFixture
 {
+    /// <summary>Справочник специализаций.</summary>
+    public List<Specialization> Specializations { get; }
+
     /// <summary>Клиенты.</summary>
     public List<Client> Clients { get; }
-
-    /// <summary>Абонементы.</summary>
-    public List<Membership> Memberships { get; }
 
     /// <summary>Тренеры.</summary>
     public List<Trainer> Trainers { get; }
 
-    /// <summary>Тренировки.</summary>
-    public List<Workout> Workouts { get; }
+    /// <summary>Записи на занятия.</summary>
+    public List<Booking> Bookings { get; }
 
-    /// <summary>Посещения.</summary>
-    public List<Visit> Visits { get; }
-
-    /// <summary>
-    /// Инициализирует фикстуру, генерируя тестовый набор данных один раз.
-    /// </summary>
+    /// <summary>Инициализирует фикстуру, генерируя тестовый набор данных один раз.</summary>
     public QueriesTestFixture()
     {
         var seed = DataSeeder.Seed();
 
+        Specializations = seed.Specializations;
         Clients = seed.Clients;
-        Memberships = seed.Memberships;
         Trainers = seed.Trainers;
-        Workouts = seed.Workouts;
-        Visits = seed.Visits;
+        Bookings = seed.Bookings;
     }
 }
