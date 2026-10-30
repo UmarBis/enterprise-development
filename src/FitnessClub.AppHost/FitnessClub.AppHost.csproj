@@ -10,7 +10,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AspireUseCliBundle>true</AspireUseCliBundle>
-    <UserSecretsId>8b7a6e0d-cc87-49d7-b7e3-80e4f0384b27</UserSecretsId>
+    <UserSecretsId>3c1733dc-cbb8-4993-b54f-31f4ec9e2cc5</UserSecretsId>
   </PropertyGroup>
 
 </Project>
