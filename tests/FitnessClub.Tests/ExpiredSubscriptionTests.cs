@@ -1,10 +1,11 @@
+using FitnessClub.Domain.Entities;
+
 namespace FitnessClub.Tests;
 
 /// <summary>
 /// Тесты запроса информации о клиентах с истёкшим абонементом.
 /// </summary>
-/// <param name="fixture">Фикстура с тестовыми данными фитнес-клуба.</param>
-public class ExpiredSubscriptionTests(QueriesTestFixture fixture) : IClassFixture<QueriesTestFixture>
+public class ExpiredSubscriptionTests(FitnessClubFixture fixture) : IClassFixture<FitnessClubFixture>
 {
     /// <summary>
     /// Должен возвращать только клиентов с просроченным абонементом, упорядоченных по ФИО.
@@ -16,19 +17,20 @@ public class ExpiredSubscriptionTests(QueriesTestFixture fixture) : IClassFixtur
         var today = fixture.Today;
         string[] expectedClientNames =
         [
-            "Егоров Николай",
-            "Иванов Иван",
-            "Морозова Ольга",
-            "Новиков Сергей",
-            "Попов Дмитрий",
-            "Смирнов Алексей",
+            "Андреев Алексей",
+            "Борисова Марина",
+            "Васильев Дмитрий",
+            "Гаврилова Елена",
+            "Дмитриев Павел",
         ];
 
         // act
-        var actualClients = fixture.Clients
-            .Where(c => c.MembershipEndDate < today)
-            .OrderBy(c => c.FullName)
-            .ToList();
+        IReadOnlyList<Client> actualClients =
+        [
+            .. fixture.Clients
+                .Where(c => c.MembershipEndDate < today)
+                .OrderBy(c => c.FullName)
+        ];
 
         // assert
         Assert.Equal(expectedClientNames, actualClients.Select(c => c.FullName));

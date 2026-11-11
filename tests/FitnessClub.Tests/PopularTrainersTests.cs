@@ -3,8 +3,7 @@ namespace FitnessClub.Tests;
 /// <summary>
 /// Тесты определения наиболее популярных тренеров.
 /// </summary>
-/// <param name="fixture">Фикстура с тестовыми данными фитнес-клуба.</param>
-public class PopularTrainersTests(QueriesTestFixture fixture) : IClassFixture<QueriesTestFixture>
+public class PopularTrainersTests(FitnessClubFixture fixture) : IClassFixture<FitnessClubFixture>
 {
     /// <summary>
     /// Должен возвращать пять тренеров с наибольшим количеством записанных занятий,
@@ -16,22 +15,22 @@ public class PopularTrainersTests(QueriesTestFixture fixture) : IClassFixture<Qu
         // arrange
         string[] expectedTrainerNames =
         [
-            "Соколов Андрей",
-            "Орлова Наталья",
-            "Захаров Виктор",
-            "Лебедева Юлия",
-            "Козлов Максим",
+            "Волкова Ирина",    // 6
+            "Новиков Артур",    // 5
+            "Семёнов Кирилл",   // 4
+            "Кузнецова Наталья",// 3
+            "Морозов Георгий",  // 2
         ];
 
         // act
-        var trainersById = fixture.Trainers.ToDictionary(t => t.Id, t => t.FullName);
-        var actualTrainerNames = fixture.Bookings
-            .GroupBy(s => s.TrainerId)
-            .OrderByDescending(g => g.Count())
-            .ThenBy(g => trainersById[g.Key]) // Сортируем по алфавиту при равенстве записей
-            .Take(5)
-            .Select(g => trainersById[g.Key])
-            .ToList();
+        IReadOnlyList<string> actualTrainerNames =
+        [
+            .. fixture.Bookings
+                .GroupBy(b => b.TrainerId)
+                .OrderByDescending(g => g.Count())
+                .Take(5)
+                .Select(g => fixture.Trainers.First(t => t.Id == g.Key).FullName)
+        ];
 
         // assert
         Assert.Equal(expectedTrainerNames, actualTrainerNames);

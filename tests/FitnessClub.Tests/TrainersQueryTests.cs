@@ -1,10 +1,11 @@
+using FitnessClub.Domain.Entities;
+
 namespace FitnessClub.Tests;
 
 /// <summary>
 /// Тесты запроса информации о тренерах по стажу работы.
 /// </summary>
-/// <param name="fixture">Фикстура с тестовыми данными фитнес-клуба.</param>
-public class TrainersQueryTests(QueriesTestFixture fixture) : IClassFixture<QueriesTestFixture>
+public class TrainersQueryTests(FitnessClubFixture fixture) : IClassFixture<FitnessClubFixture>
 {
     /// <summary>
     /// Должен возвращать только тренеров, стаж работы которых не менее 5 лет.
@@ -15,22 +16,21 @@ public class TrainersQueryTests(QueriesTestFixture fixture) : IClassFixture<Quer
         // arrange
         string[] expectedTrainerNames =
         [
-            "Белова Ксения",
-            "Дмитриев Олег",
-            "Захаров Виктор",
-            "Козлов Максим",
-            "Лебедева Юлия",
-            "Никитин Роман",
-            "Орлова Наталья",
-            "Соколов Андрей",
-            "Титов Артём",
+            "Кузнецова Наталья",
+            "Лебедева Дарья",
+            "Новиков Артур",
+            "Морозов Георгий",
+            "Волкова Ирина",
+            "Павлова Светлана",
+            "Семёнов Кирилл",
+            "Голубева Вероника",
         ];
 
         // act
-        var actualTrainers = fixture.Trainers
-            .Where(t => t.ExperienceYears >= 5)
-            .OrderBy(t => t.FullName)
-            .ToList();
+        IReadOnlyList<Trainer> actualTrainers =
+        [
+            .. fixture.Trainers.Where(t => t.ExperienceYears >= 5)
+        ];
 
         // assert
         Assert.Equal(expectedTrainerNames, actualTrainers.Select(t => t.FullName));

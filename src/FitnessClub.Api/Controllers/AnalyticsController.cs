@@ -1,26 +1,44 @@
-using FitnessClub.Api.Services;
+using FitnessClub.Contracts.Dto;
+using FitnessClub.Contracts.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FitnessClub.Api.Controllers;
 
+/// <summary>Аналитические запросы (5 из задания).</summary>
 [ApiController]
 [Route("api/analytics")]
-public class AnalyticsController(AnalyticsService analytics) : ControllerBase
+[Produces("application/json")]
+public class AnalyticsController : ControllerBase
 {
-    [HttpGet("experienced-trainers")]
-    public IActionResult GetExperiencedTrainers() => Ok(analytics.GetTrainersWith5YearsExperience());
+    private readonly IAnalyticsService _service;
+    public AnalyticsController(IAnalyticsService service) => _service = service;
 
-    [HttpGet("expired-clients")]
-    public IActionResult GetExpiredClients() => Ok(analytics.GetExpiredClients());
+    /// <summary>Тренеры со стажем не менее заданного (по умолчанию 5 лет).</summary>
+    [HttpGet("trainers/experienced")]
+    public async Task<ActionResult<IReadOnlyList<TrainerDto>>> Experienced(
+        [FromQuery] int minYears = 5, CancellationToken ct = default)
+        => Ok(await _service.GetTrainersWithMinExperienceAsync(minYears, ct));
 
-    [HttpGet("popular-trainers")]
-    public IActionResult GetPopularTrainers() => Ok(analytics.GetTop5Trainers());
+    /// <summary>Доступность зала на указанный момент времени.</summary>
+    [HttpGet("halls/{hallName}/availability")]
+    public async Task<ActionResult<HallAvailabilityDto>> HallAvailability(
+        string hallName, [FromQuery] DateTime at, CancellationToken ct)
+        => Ok(await _service.CheckHallAvailabilityAsync(hallName, at, ct));
 
-    [HttpGet("hall-availability")]
-    public IActionResult CheckHall([FromQuery] string hallName, [FromQuery] DateTime at)
-        => Ok(new { HallName = hallName, Available = analytics.IsHallAvailable(hallName, at, 60) });
+    /// <summary>Клиенты с просроченным абонементом (по ФИО).</summary>
+    [HttpGet("clients/expired")]
+    public async Task<ActionResult<IReadOnlyList<ClientDto>>> ExpiredClients(CancellationToken ct)
+        => Ok(await _service.GetExpiredSubscriptionClientsAsync(ct));
 
-    [HttpGet("current-month-bookings")]
-    public IActionResult GetCurrentMonthBookings([FromQuery] string hallName)
-        => Ok(analytics.GetCurrentMonthBookings(hallName));
+    /// <summary>Занятия в зале за месяц.</summary>
+    [HttpGet("halls/{hallName}/bookings")]
+    public async Task<ActionResult<IReadOnlyList<BookingDto>>> HallBookings(
+        string hallName, [FromQuery] int year, [FromQuery] int month, CancellationToken ct)
+        => Ok(await _service.GetBookingsInHallForMonthAsync(hallName, year, month, ct));
+
+    /// <summary>Топ-N популярных тренеров (по умолчанию 5).</summary>
+    [HttpGet("trainers/top")]
+    public async Task<ActionResult<IReadOnlyList<PopularTrainerDto>>> TopTrainers(
+        [FromQuery] int count = 5, CancellationToken ct = default)
+        => Ok(await _service.GetTopPopularTrainersAsync(count, ct));
 }
