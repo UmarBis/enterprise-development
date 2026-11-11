@@ -53,24 +53,27 @@ REST API сервер, реализующий базовые CRUD-операци
 
 ```bash
 dotnet run --project src/FitnessClub.Api
+```
+Сервер доступен на https://localhost:<port>. Swagger (OpenAPI) доступен по пути /swagger.
 
 CRUD-эндпоинты
-Сущность	                       Методы
-Клиенты	       GET/POST /api/clients, GET/PUT/DELETE /api/clients/{id}
-Тренеры	       GET/POST /api/trainers, GET/PUT/DELETE /api/trainers/{id}
-Специализации	 GET/POST /api/specializations, GET/PUT/DELETE /api/specializations/{id}
-Занятия	       GET/POST /api/bookings, GET/PUT/DELETE /api/bookings/{id}
+  Сущность	                           Методы
+Клиенты	           GET/POST /api/clients, GET/PUT/DELETE /api/clients/{id}
+Тренеры	           GET/POST /api/trainers, GET/PUT/DELETE /api/trainers/{id}
+Специализации	     GET/POST /api/specializations, GET/PUT/DELETE /api/specializations/{id}
+Занятия	           GET/POST /api/bookings, GET/PUT/DELETE /api/bookings/{id}
 
 
 Аналитические эндпоинты
-       Запрос	                                     Эндпоинт
-Тренеры со стажем не менее 5 лет	  GET /api/trainers/experienced?minYears=5
-Доступность зала для записи	        GET /api/halls/{hallName}/availability?at=...
-Клиенты с просроченным абонементом	GET /api/clients/expired
-Занятия за текущий месяц в зале   	GET /api/bookings/current-month?hallName=...
-Топ-5 популярных тренеров	          GET /api/trainers/popular?count=5
+          Запрос	                                       Эндпоинт
+Тренеры со стажем не менее 5 лет	  GET /api/analytics/trainers/experienced?minYears=5
+Доступность зала для записи	        GET /api/analytics/halls/{hallName}/availability?at=...
+Клиенты с просроченным абонементом	GET /api/analytics/clients/expired
+Занятия за текущий месяц в зале	    GET /api/analytics/halls/{hallName}/bookings?year=...&month=...
+Топ-5 популярных тренеров	          GET /api/analytics/trainers/top?count=5
 
-Запуск тестов:
-  dotnet test
 
-Тесты также выполняются автоматически в GitHub Actions при каждом push и pull request.
+Запуск тестов
+```bash
+dotnet test
+```
