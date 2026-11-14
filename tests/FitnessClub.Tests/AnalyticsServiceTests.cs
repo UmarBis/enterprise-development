@@ -29,7 +29,7 @@ public class AnalyticsServiceTests
             .OrderBy(client => client.FullName)
             .Select(client => client.Id);
 
-        var actual = await service.GetExpiredSubscriptionClientsAsync();
+        var actual = await service.GetExpiredSubscriptionClientsAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(expectedIds, actual.Select(client => client.Id));
     }
