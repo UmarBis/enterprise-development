@@ -15,6 +15,7 @@ public class UpsertBookingDto
     public DateTime? SessionDateTime { get; init; }
 
     [Required(ErrorMessage = "Не указано название зала")]
+    [MinLength(2, ErrorMessage = "Название зала слишком короткое")]
     public string HallName { get; init; } = string.Empty;
 
     public bool IsTrial { get; init; }

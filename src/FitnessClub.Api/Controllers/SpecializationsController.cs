@@ -24,6 +24,7 @@ public class SpecializationsController : ControllerBase
     /// <response code="200">Успешно.</response>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<SpecializationDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IReadOnlyList<SpecializationDto>>> GetAll(CancellationToken ct)
     {
         _logger.LogInformation("Запрос списка специализаций");
@@ -38,6 +39,7 @@ public class SpecializationsController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(SpecializationDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SpecializationDto>> GetById(Guid id, CancellationToken ct)
     {
         _logger.LogInformation("Запрос специализации {Id}", id);
@@ -53,6 +55,7 @@ public class SpecializationsController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(SpecializationDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SpecializationDto>> Create([FromBody] UpsertSpecializationDto dto, CancellationToken ct)
     {
         _logger.LogInformation("Создание специализации {Name}", dto.Name);
@@ -68,7 +71,9 @@ public class SpecializationsController : ControllerBase
     /// <response code="404">Специализация не найдена.</response>
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(SpecializationDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SpecializationDto>> Update(Guid id, [FromBody] UpsertSpecializationDto dto, CancellationToken ct)
     {
         _logger.LogInformation("Обновление специализации {Id}", id);
@@ -84,7 +89,9 @@ public class SpecializationsController : ControllerBase
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Delete(Guid id, CancellationToken ct)
     {
         _logger.LogInformation("Удаление специализации {Id}", id);
         return await _service.DeleteAsync(id, ct) ? NoContent() : NotFound();

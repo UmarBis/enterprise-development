@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using FitnessClub.Contracts.Dto;
 using FitnessClub.Contracts.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -25,8 +26,10 @@ public class AnalyticsController : ControllerBase
     /// <response code="200">Успешно.</response>
     [HttpGet("trainers/experienced")]
     [ProducesResponseType(typeof(IReadOnlyList<TrainerDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IReadOnlyList<TrainerDto>>> Experienced(
-        [FromQuery] int minYears = 5, CancellationToken ct = default)
+        [FromQuery, Range(0, 100)] int minYears = 5, CancellationToken ct = default)
     {
         _logger.LogInformation("Аналитика: тренеры со стажем >= {MinYears}", minYears);
         return Ok(await _service.GetTrainersWithMinExperienceAsync(minYears, ct));
@@ -39,6 +42,8 @@ public class AnalyticsController : ControllerBase
     /// <response code="200">Успешно.</response>
     [HttpGet("halls/{hallName}/availability")]
     [ProducesResponseType(typeof(HallAvailabilityDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<HallAvailabilityDto>> HallAvailability(
         string hallName, [FromQuery] DateTime at, CancellationToken ct)
     {
@@ -51,6 +56,7 @@ public class AnalyticsController : ControllerBase
     /// <response code="200">Успешно.</response>
     [HttpGet("clients/expired")]
     [ProducesResponseType(typeof(IReadOnlyList<ClientDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IReadOnlyList<ClientDto>>> ExpiredClients(CancellationToken ct)
     {
         _logger.LogInformation("Аналитика: клиенты с просроченным абонементом");
@@ -65,8 +71,10 @@ public class AnalyticsController : ControllerBase
     /// <response code="200">Успешно.</response>
     [HttpGet("halls/{hallName}/bookings")]
     [ProducesResponseType(typeof(IReadOnlyList<BookingDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IReadOnlyList<BookingDto>>> HallBookings(
-        string hallName, [FromQuery] int year, [FromQuery] int month, CancellationToken ct)
+        string hallName, [FromQuery, Range(1, 9999)] int year, [FromQuery, Range(1, 12)] int month, CancellationToken ct)
     {
         _logger.LogInformation("Аналитика: занятия в зале {HallName} за {Year}-{Month:D2}", hallName, year, month);
         return Ok(await _service.GetBookingsInHallForMonthAsync(hallName, year, month, ct));
@@ -78,8 +86,10 @@ public class AnalyticsController : ControllerBase
     /// <response code="200">Успешно.</response>
     [HttpGet("trainers/top")]
     [ProducesResponseType(typeof(IReadOnlyList<PopularTrainerDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IReadOnlyList<PopularTrainerDto>>> TopTrainers(
-        [FromQuery] int count = 5, CancellationToken ct = default)
+        [FromQuery, Range(1, 100)] int count = 5, CancellationToken ct = default)
     {
         _logger.LogInformation("Аналитика: топ-{Count} популярных тренеров", count);
         return Ok(await _service.GetTopPopularTrainersAsync(count, ct));

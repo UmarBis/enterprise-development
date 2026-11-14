@@ -22,13 +22,16 @@
 - `src/FitnessClub.Contracts` — DTO с валидационными атрибутами и интерфейсы сервисов.
 - `src/FitnessClub.Application` — реализация сервисов: маппинг сущностей в DTO, бизнес-логика, аналитические запросы.
 - `src/FitnessClub.Infrastructure.InMemory` — реализации репозиториев поверх коллекций в памяти.
-- `src/FitnessClub.ServiceDefaults` — общие настройки телеметрии и resilience.
+- `src/FitnessClub.ServiceDefaults` — настройки OpenTelemetry, health checks, service discovery и HTTP resilience.
 - `src/FitnessClub.Api` — REST API сервер (ASP.NET Core, .NET 10).
 - `tests/FitnessClub.Tests` — unit-тесты аналитических запросов (xUnit v3).
 
 Хранение данных абстрагировано за интерфейсами репозиториев: переход с коллекций
 в памяти на СУБД выполняется заменой реализаций в конфигурации DI.
 Контроллеры, сервисы и репозитории используют асинхронные контракты.
+Проверка существования связанных сущностей выполняется в Application; удаление
+клиентов, тренеров и специализаций, на которые ссылаются другие записи,
+возвращает конфликт HTTP 409.
 За клиентов, тренеров, специализации и занятия отвечают отдельные сервисы,
 аналитические запросы реализованы в `AnalyticsService`.
 
@@ -55,6 +58,10 @@ REST API сервер, реализующий базовые CRUD-операци
 dotnet run --project src/FitnessClub.Api
 ```
 Сервер доступен на https://localhost:<port>. Swagger (OpenAPI) доступен по пути /swagger.
+Проверки состояния ServiceDefaults доступны по `/health` и `/alive` в Development.
+
+Ожидаемые ошибки возвращаются в формате ProblemDetails: 400 — некорректный запрос,
+404 — отсутствующая сущность, 409 — конфликт связей, 500 — непредвиденная ошибка.
 
 CRUD-эндпоинты
   Сущность	                           Методы

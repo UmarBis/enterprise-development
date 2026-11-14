@@ -2,21 +2,31 @@ using FitnessClub.Api.Middleware;
 using FitnessClub.Application.Services;
 using FitnessClub.Contracts.Services;
 using FitnessClub.Infrastructure.InMemory;
+using FitnessClub.ServiceDefaults;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(o =>
+builder.Services.AddSwaggerGen(options =>
 {
-    o.SwaggerDoc("v1", new OpenApiInfo { Title = "FitnessClub API", Version = "v1" });
-    var xml = Path.Combine(AppContext.BaseDirectory, "FitnessClub.Api.xml");
-    if (File.Exists(xml)) o.IncludeXmlComments(xml);
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "FitnessClub API",
+        Version = "v1"
+    });
+
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, "FitnessClub.Api.xml");
+    if (File.Exists(xmlPath))
+        options.IncludeXmlComments(xmlPath);
 });
 
-builder.Services.AddCors(p => p.AddDefaultPolicy(b =>
-    b.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+    policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 builder.Services.AddInMemoryInfrastructure();
 builder.Services.AddScoped<IClientService, ClientService>();
@@ -30,8 +40,11 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors();
 app.UseSwagger();
-app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FitnessClub API v1"));
+app.UseSwaggerUI(options =>
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "FitnessClub API v1"));
+
 app.MapControllers();
+app.MapDefaultEndpoints();
+
 app.Run();
 
-public partial class Program;

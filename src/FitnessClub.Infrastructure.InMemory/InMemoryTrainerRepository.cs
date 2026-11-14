@@ -15,7 +15,7 @@ public class InMemoryTrainerRepository : ITrainerRepository
     }
 
     public Task<IReadOnlyList<Trainer>> GetAllAsync(CancellationToken ct = default)
-        => Task.FromResult<IReadOnlyList<Trainer>>(_store.Values.ToList());
+        => Task.FromResult<IReadOnlyList<Trainer>>([.. _store.Values]);
 
     public Task<Trainer?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => Task.FromResult(_store.TryGetValue(id, out var t) ? t : null);

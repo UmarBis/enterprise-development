@@ -24,6 +24,7 @@ public class TrainersController : ControllerBase
     /// <response code="200">Успешно.</response>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<TrainerDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IReadOnlyList<TrainerDto>>> GetAll(CancellationToken ct)
     {
         _logger.LogInformation("Запрос списка тренеров");
@@ -38,6 +39,7 @@ public class TrainersController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(TrainerDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<TrainerDto>> GetById(Guid id, CancellationToken ct)
     {
         _logger.LogInformation("Запрос тренера {Id}", id);
@@ -53,6 +55,8 @@ public class TrainersController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(TrainerDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<TrainerDto>> Create([FromBody] UpsertTrainerDto dto, CancellationToken ct)
     {
         _logger.LogInformation("Создание тренера {LastName} {FirstName}", dto.LastName, dto.FirstName);
@@ -68,7 +72,9 @@ public class TrainersController : ControllerBase
     /// <response code="404">Тренер не найден.</response>
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(TrainerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<TrainerDto>> Update(Guid id, [FromBody] UpsertTrainerDto dto, CancellationToken ct)
     {
         _logger.LogInformation("Обновление тренера {Id}", id);
@@ -84,7 +90,9 @@ public class TrainersController : ControllerBase
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Delete(Guid id, CancellationToken ct)
     {
         _logger.LogInformation("Удаление тренера {Id}", id);
         return await _service.DeleteAsync(id, ct) ? NoContent() : NotFound();

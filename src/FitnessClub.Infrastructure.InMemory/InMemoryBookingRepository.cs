@@ -4,28 +4,34 @@ using FitnessClub.Domain.Repositories;
 
 namespace FitnessClub.Infrastructure.InMemory;
 
+/// <summary>In-memory хранилище записей на занятия.</summary>
 public class InMemoryBookingRepository : IBookingRepository
 {
     private readonly ConcurrentDictionary<Guid, Booking> _store = new();
 
-    public InMemoryBookingRepository() { }
+    /// <summary>Создаёт хранилище, заполненное начальными данными.</summary>
     public InMemoryBookingRepository(IEnumerable<Booking> seed)
     {
-        foreach (var b in seed) _store[b.Id] = b;
+        foreach (var booking in seed)
+            _store[booking.Id] = booking;
     }
 
+    /// <inheritdoc/>
     public Task<IReadOnlyList<Booking>> GetAllAsync(CancellationToken ct = default)
-        => Task.FromResult<IReadOnlyList<Booking>>(_store.Values.ToList());
+        => Task.FromResult<IReadOnlyList<Booking>>([.. _store.Values]);
 
+    /// <inheritdoc/>
     public Task<Booking?> GetByIdAsync(Guid id, CancellationToken ct = default)
-        => Task.FromResult(_store.TryGetValue(id, out var b) ? b : null);
+        => Task.FromResult(_store.GetValueOrDefault(id));
 
+    /// <inheritdoc/>
     public Task<Booking> AddAsync(Booking booking, CancellationToken ct = default)
     {
         _store[booking.Id] = booking;
         return Task.FromResult(booking);
     }
 
+    /// <inheritdoc/>
     public Task<bool> UpdateAsync(Guid id, Booking booking, CancellationToken ct = default)
     {
         if (!_store.ContainsKey(id)) return Task.FromResult(false);
@@ -33,19 +39,16 @@ public class InMemoryBookingRepository : IBookingRepository
         return Task.FromResult(true);
     }
 
+    /// <inheritdoc/>
     public Task<bool> DeleteAsync(Guid id, CancellationToken ct = default)
         => Task.FromResult(_store.TryRemove(id, out _));
 
-    public Task<bool> HasByTrainerAsync(Guid trainerId, CancellationToken ct = default)
-        => Task.FromResult(_store.Values.Any(b => b.TrainerId == trainerId));
+    /// <inheritdoc/>
+    public Task<IReadOnlyList<Booking>> GetByHallAndMonthAsync(
+        string hallName, int year, int month, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<Booking>>([.. _store.Values.Where(booking =>
+            string.Equals(booking.HallName, hallName, StringComparison.OrdinalIgnoreCase)
+            && booking.ScheduledAt.Year == year
+            && booking.ScheduledAt.Month == month)]);
 
-    public Task<IReadOnlyList<Booking>> GetByHallAndMonthAsync(string hallName, int year, int month, CancellationToken ct = default)
-        => Task.FromResult<IReadOnlyList<Booking>>(_store.Values
-            .Where(b => string.Equals(b.HallName, hallName, StringComparison.OrdinalIgnoreCase)
-                        && b.ScheduledAt.Year == year
-                        && b.ScheduledAt.Month == month)
-            .ToList());
-
-    public Task<int> CountByTrainerAsync(Guid trainerId, CancellationToken ct = default)
-        => Task.FromResult(_store.Values.Count(b => b.TrainerId == trainerId));
 }

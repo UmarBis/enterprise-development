@@ -5,61 +5,85 @@ using FitnessClub.Domain.Repositories;
 
 namespace FitnessClub.Application.Services;
 
-public class AnalyticsService : IAnalyticsService
+/// <summary>Реализует аналитические запросы фитнес-клуба.</summary>
+public class AnalyticsService(
+    ITrainerRepository trainers,
+    ISpecializationRepository specs,
+    IBookingRepository bookings,
+    IClientRepository clients,
+    TimeProvider timeProvider) : IAnalyticsService
 {
-    private readonly ITrainerRepository _trainers;
-    private readonly ISpecializationRepository _specs;
-    private readonly IBookingRepository _bookings;
-    private readonly IClientRepository _clients;
-    private readonly Func<DateTime> _now;
-
-    public AnalyticsService(ITrainerRepository trainers, ISpecializationRepository specs,
-                            IBookingRepository bookings, IClientRepository clients, Func<DateTime> now)
-        => (_trainers, _specs, _bookings, _clients, _now) = (trainers, specs, bookings, clients, now);
-
-    public async Task<IReadOnlyList<TrainerDto>> GetTrainersWithMinExperienceAsync(int minYears, CancellationToken ct = default)
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<TrainerDto>> GetTrainersWithMinExperienceAsync(
+        int minYears, CancellationToken ct = default)
     {
-        var specs = (await _specs.GetAllAsync(ct)).ToDictionary(s => s.Id, s => s.Name);
-        return (await _trainers.GetAllAsync(ct))
-            .Where(t => t.ExperienceYears >= minYears)
-            .OrderByDescending(t => t.ExperienceYears)
-            .Select(t => t.ToDto(specs.GetValueOrDefault(t.SpecializationId, string.Empty)))
-            .ToList();
+        var specializationNames = (await specs.GetAllAsync(ct))
+            .ToDictionary(s => s.Id, s => s.Name);
+
+        return [.. (await trainers.GetAllAsync(ct))
+            .Where(trainer => trainer.ExperienceYears >= minYears)
+            .OrderByDescending(trainer => trainer.ExperienceYears)
+            .Select(trainer => trainer.ToDto(
+                specializationNames.GetValueOrDefault(trainer.SpecializationId, string.Empty)))];
     }
 
-    public async Task<HallAvailabilityDto> CheckHallAvailabilityAsync(string hallName, DateTime at, CancellationToken ct = default)
+    /// <inheritdoc/>
+    public async Task<HallAvailabilityDto> CheckHallAvailabilityAsync(
+        string hallName, DateTime at, CancellationToken ct = default)
     {
-        var busy = (await _bookings.GetAllAsync(ct)).Any(b =>
-            string.Equals(b.HallName, hallName, StringComparison.OrdinalIgnoreCase)
-            && b.ScheduledAt <= at && at < b.ScheduledAt.AddHours(1));
-        return new HallAvailabilityDto { HallName = hallName, At = at, IsAvailable = !busy };
-    }
+        var bookingsInHall = await bookings.GetAllAsync(ct);
+        var bookingsForHall = bookingsInHall.Where(booking =>
+            string.Equals(booking.HallName, hallName, StringComparison.OrdinalIgnoreCase));
 
-    public async Task<IReadOnlyList<ClientDto>> GetExpiredSubscriptionClientsAsync(CancellationToken ct = default)
-    {
-        var today = DateOnly.FromDateTime(_now());
-        return (await _clients.GetAllAsync(ct))
-            .Where(c => c.IsMembershipExpired(today))
-            .OrderBy(c => c.FullName)
-            .Select(c => c.ToDto())
-            .ToList();
-    }
+        var isBusy = bookingsForHall.Any(booking =>
+            booking.ScheduledAt <= at
+            && at < booking.ScheduledAt.AddHours(1));
 
-    public async Task<IReadOnlyList<BookingDto>> GetBookingsInHallForMonthAsync(string hallName, int year, int month, CancellationToken ct = default)
-        => (await _bookings.GetByHallAndMonthAsync(hallName, year, month, ct))
-            .OrderBy(b => b.ScheduledAt)
-            .Select(b => b.ToDto())
-            .ToList();
-
-    public async Task<IReadOnlyList<PopularTrainerDto>> GetTopPopularTrainersAsync(int count, CancellationToken ct = default)
-    {
-        var trainers = await _trainers.GetAllAsync(ct);
-        var result = new List<PopularTrainerDto>(trainers.Count);
-        foreach (var t in trainers)
+        return new HallAvailabilityDto
         {
-            var c = await _bookings.CountByTrainerAsync(t.Id, ct);
-            result.Add(new PopularTrainerDto { TrainerId = t.Id, FullName = t.FullName, BookingsCount = c });
-        }
-        return result.OrderByDescending(x => x.BookingsCount).Take(count).ToList();
+            HallName = hallName,
+            At = at,
+            IsAvailable = !isBusy
+        };
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<ClientDto>> GetExpiredSubscriptionClientsAsync(
+        CancellationToken ct = default)
+    {
+        var today = DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
+
+        return [.. (await clients.GetAllAsync(ct))
+            .Where(client => client.IsMembershipExpired(today))
+            .OrderBy(client => client.FullName)
+            .Select(client => client.ToDto())];
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<BookingDto>> GetBookingsInHallForMonthAsync(
+        string hallName, int year, int month, CancellationToken ct = default)
+        => [.. (await bookings.GetByHallAndMonthAsync(hallName, year, month, ct))
+            .OrderBy(booking => booking.ScheduledAt)
+            .Select(booking => booking.ToDto())];
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<PopularTrainerDto>> GetTopPopularTrainersAsync(
+        int count, CancellationToken ct = default)
+    {
+        var allTrainers = await trainers.GetAllAsync(ct);
+        var bookingCounts = (await bookings.GetAllAsync(ct))
+            .GroupBy(booking => booking.TrainerId)
+            .ToDictionary(group => group.Key, group => group.Count());
+
+        return [.. allTrainers
+            .Select(trainer => new PopularTrainerDto
+            {
+                TrainerId = trainer.Id,
+                FullName = trainer.FullName,
+                BookingsCount = bookingCounts.GetValueOrDefault(trainer.Id)
+            })
+            .OrderByDescending(trainer => trainer.BookingsCount)
+            .ThenBy(trainer => trainer.FullName)
+            .Take(count)];
     }
 }

@@ -15,7 +15,7 @@ public class InMemorySpecializationRepository : ISpecializationRepository
     }
 
     public Task<IReadOnlyList<Specialization>> GetAllAsync(CancellationToken ct = default)
-        => Task.FromResult<IReadOnlyList<Specialization>>(_store.Values.ToList());
+        => Task.FromResult<IReadOnlyList<Specialization>>([.. _store.Values]);
 
     public Task<Specialization?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => Task.FromResult(_store.TryGetValue(id, out var s) ? s : null);

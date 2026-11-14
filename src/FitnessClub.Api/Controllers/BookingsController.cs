@@ -24,6 +24,7 @@ public class BookingsController : ControllerBase
     /// <response code="200">Успешно.</response>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<BookingDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IReadOnlyList<BookingDto>>> GetAll(CancellationToken ct)
     {
         _logger.LogInformation("Запрос списка записей");
@@ -38,6 +39,7 @@ public class BookingsController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(BookingDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<BookingDto>> GetById(Guid id, CancellationToken ct)
     {
         _logger.LogInformation("Запрос записи {Id}", id);
@@ -53,6 +55,8 @@ public class BookingsController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(BookingDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<BookingDto>> Create([FromBody] UpsertBookingDto dto, CancellationToken ct)
     {
         _logger.LogInformation("Создание записи в зале {HallName}", dto.HallName);
@@ -68,7 +72,9 @@ public class BookingsController : ControllerBase
     /// <response code="404">Запись не найдена.</response>
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(BookingDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<BookingDto>> Update(Guid id, [FromBody] UpsertBookingDto dto, CancellationToken ct)
     {
         _logger.LogInformation("Обновление записи {Id}", id);
@@ -84,7 +90,8 @@ public class BookingsController : ControllerBase
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Delete(Guid id, CancellationToken ct)
     {
         _logger.LogInformation("Удаление записи {Id}", id);
         return await _service.DeleteAsync(id, ct) ? NoContent() : NotFound();
