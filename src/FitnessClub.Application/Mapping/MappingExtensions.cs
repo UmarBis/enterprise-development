@@ -3,8 +3,10 @@ using FitnessClub.Domain.Entities;
 
 namespace FitnessClub.Application.Mapping;
 
+/// <summary>Содержит методы преобразования доменных сущностей в DTO.</summary>
 public static class MappingExtensions
 {
+    /// <summary>Преобразует клиента в DTO.</summary>
     public static ClientDto ToDto(this Client c) => new()
     {
         Id = c.Id,
@@ -17,6 +19,7 @@ public static class MappingExtensions
         SubscriptionEnd = c.MembershipEndDate
     };
 
+    /// <summary>Преобразует тренера в DTO с названием специализации.</summary>
     public static TrainerDto ToDto(this Trainer t, string specializationName) => new()
     {
         Id = t.Id,
@@ -29,12 +32,14 @@ public static class MappingExtensions
         ExperienceYears = t.ExperienceYears
     };
 
+    /// <summary>Преобразует специализацию в DTO.</summary>
     public static SpecializationDto ToDto(this Specialization s) => new()
     {
         Id = s.Id,
         Name = s.Name
     };
 
+    /// <summary>Преобразует запись на занятие в DTO.</summary>
     public static BookingDto ToDto(this Booking b) => new()
     {
         Id = b.Id,
