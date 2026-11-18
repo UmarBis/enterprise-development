@@ -7,11 +7,8 @@ namespace FitnessClub.Contracts.Dto;
 /// </summary>
 public class UpsertSpecializationDto
 {
-    /// <summary>
-    /// Название специализации.
-    /// </summary>
+    /// <summary>Название специализации.</summary>
     [Required(ErrorMessage = "Не указано название специализации")]
     [MinLength(2, ErrorMessage = "Название специализации слишком короткое")]
-    /// <summary>Название специализации.</summary>
     public string Name { get; init; } = string.Empty;
 }
