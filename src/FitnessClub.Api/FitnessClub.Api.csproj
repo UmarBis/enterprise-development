@@ -14,7 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FitnessClub.ServiceDefaults\FitnessClub.ServiceDefaults.csproj" />
     <ProjectReference Include="..\FitnessClub.Contracts\FitnessClub.Contracts.csproj" />
-    <ProjectReference Include="..\FitnessClub.Infrastructure.InMemory\FitnessClub.Infrastructure.InMemory.csproj" />
+    <ProjectReference Include="..\FitnessClub.Infrastructure.SqlServer\FitnessClub.Infrastructure.SqlServer.csproj" />
     <ProjectReference Include="..\FitnessClub.Application\FitnessClub.Application.csproj" />
   </ItemGroup>
 

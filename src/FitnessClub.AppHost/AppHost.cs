@@ -1,6 +1,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-// Добавляем наш API в оркестратор
-builder.AddProject<Projects.FitnessClub_Api>("fitnessclub-api");
+var sql = builder.AddSqlServer("sql")
+    .WithDataVolume()
+    .AddDatabase("fitnessclub");
+
+builder.AddProject<Projects.FitnessClub_Api>("fitnessclub-api")
+    .WithReference(sql)
+    .WaitFor(sql);
 
 builder.Build().Run();

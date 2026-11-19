@@ -84,3 +84,95 @@ CRUD-эндпоинты
 ```bash
 dotnet test
 ```
+
+## Лабораторная работа №3 «ORM»
+
+В третьей лабораторной работе InMemory-хранилище заменено на Microsoft SQL Server
+с использованием Entity Framework Core 10.
+
+### Реализованные изменения
+
+- Добавлен проект `FitnessClub.Infrastructure.SqlServer` с контекстом `FitnessClubDbContext`.
+- Реализованы SQL Server-репозитории для клиентов, тренеров, специализаций и записей на занятия.
+  Контракты репозиториев и сервисный слой сохранены, поэтому контроллеры и бизнес-логика
+  не зависят от конкретной СУБД.
+- Настроено отображение модели `Person` по стратегии TPC: данные клиентов и тренеров
+  хранятся в отдельных таблицах `Clients` и `Trainers`.
+- Настроены внешние ключи от тренеров к специализациям и от записей к клиентам/тренерам,
+  ограничения уникальности паспортных номеров и названий специализаций, индексы для аналитических запросов.
+- Добавлена миграция `20261120010000_InitialCreate`.
+- При запуске API выполняется `Database.MigrateAsync()`. Если таблица специализаций пуста,
+  база заполняется исходным набором из `ClubDataSeeder` (12 клиентов, 12 тренеров,
+  10 специализаций и 26 записей).
+- В `FitnessClub.AppHost` добавлен ресурс SQL Server и база `fitnessclub`.
+  Aspire запускает SQL Server и API, передавая приложению строку подключения.
+
+### Структура хранения
+
+| Таблица | Назначение |
+|---|---|
+| `Clients` | Клиенты и сведения об абонементах |
+| `Trainers` | Тренеры, стаж и ссылка на специализацию |
+| `Specializations` | Справочник специализаций |
+| `Bookings` | Записи клиентов на занятия |
+
+### Запуск через .NET Aspire
+
+Требуются .NET SDK 10 и Docker Desktop (или совместимый Docker Engine).
+
+Из корня решения:
+
+```bash
+dotnet run --project src/FitnessClub.AppHost
+```
+
+Откройте адрес панели Aspire, который появится в терминале. В панели будут доступны
+ресурсы SQL Server и `fitnessclub-api`. При первом запуске Aspire создаст контейнер SQL Server,
+а API применит миграцию и заполнит базу начальными данными.
+
+Swagger доступен по адресу API, путь `/swagger`.
+
+### Запуск API отдельно
+
+Для запуска без Aspire укажите строку подключения в `src/FitnessClub.Api/appsettings.json`
+или через переменную окружения `ConnectionStrings__fitnessclub`. Например:
+
+```text
+Server=localhost,1433;Database=FitnessClub;User Id=sa;Password=<YOUR_PASSWORD>;TrustServerCertificate=True;Encrypt=False
+```
+
+SQL Server должен быть предварительно запущен и доступен по указанному адресу.
+
+### Работа с миграциями
+
+В проект добавлен локальный манифест инструмента `dotnet-ef`. Восстановите инструмент:
+
+```bash
+dotnet tool restore
+```
+
+Применить существующие миграции:
+
+```bash
+dotnet ef database update --project src/FitnessClub.Infrastructure.SqlServer --startup-project src/FitnessClub.Api
+```
+
+Создать следующую миграцию после изменения модели:
+
+```bash
+dotnet ef migrations add <MigrationName> --project src/FitnessClub.Infrastructure.SqlServer --startup-project src/FitnessClub.Api
+```
+
+Миграции также применяются автоматически при старте API.
+
+### Unit-тесты
+
+Тестовый проект и InMemory-реализации сохранены для изолированных unit-тестов
+бизнес-логики. Для запуска:
+
+```bash
+dotnet test
+```
+
+В API зарегистрирована SQL Server-инфраструктура; InMemory-проект больше не используется
+сервером в качестве основного хранилища.

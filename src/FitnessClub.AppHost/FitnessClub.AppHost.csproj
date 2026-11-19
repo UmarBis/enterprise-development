@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FitnessClub.Api\FitnessClub.Api.csproj" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.6.5" />
   </ItemGroup>
 
   <PropertyGroup>
