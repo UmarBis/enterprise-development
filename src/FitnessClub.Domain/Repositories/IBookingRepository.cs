@@ -6,15 +6,15 @@ namespace FitnessClub.Domain.Repositories;
 public interface IBookingRepository
 {
     /// <summary>Возвращает все записи.</summary>
-    Task<IReadOnlyList<Booking>> GetAllAsync(CancellationToken ct = default);
+    public Task<IReadOnlyList<Booking>> GetAllAsync(CancellationToken ct = default);
     /// <summary>Возвращает запись по идентификатору.</summary>
-    Task<Booking?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    public Task<Booking?> GetByIdAsync(Guid id, CancellationToken ct = default);
     /// <summary>Добавляет запись.</summary>
-    Task<Booking> AddAsync(Booking booking, CancellationToken ct = default);
+    public Task<Booking> AddAsync(Booking booking, CancellationToken ct = default);
     /// <summary>Обновляет запись.</summary>
-    Task<bool> UpdateAsync(Guid id, Booking booking, CancellationToken ct = default);
+    public Task<bool> UpdateAsync(Guid id, Booking booking, CancellationToken ct = default);
     /// <summary>Удаляет запись.</summary>
-    Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
+    public Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
     /// <summary>Возвращает записи выбранного зала за указанный месяц.</summary>
-    Task<IReadOnlyList<Booking>> GetByHallAndMonthAsync(string hallName, int year, int month, CancellationToken ct = default);
+    public Task<IReadOnlyList<Booking>> GetByHallAndMonthAsync(string hallName, int year, int month, CancellationToken ct = default);
 }

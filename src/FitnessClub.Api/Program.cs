@@ -28,11 +28,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-var connectionString = builder.Configuration.GetConnectionString("fitnessclub")
-    ?? builder.Configuration.GetConnectionString("FitnessClub")
-    ?? "Server=localhost,1433;Database=FitnessClub;User Id=sa;Password=Your_password123!;TrustServerCertificate=True;Encrypt=False";
-
-builder.Services.AddSqlServerInfrastructure(connectionString);
+builder.AddSqlServerDbContext<FitnessClubDbContext>("fitnessclub");
+builder.Services.AddSqlServerInfrastructure();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<ITrainerService, TrainerService>();
 builder.Services.AddScoped<ISpecializationService, SpecializationService>();

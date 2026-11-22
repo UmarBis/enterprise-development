@@ -6,13 +6,13 @@ namespace FitnessClub.Domain.Repositories;
 public interface ITrainerRepository
 {
     /// <summary>Возвращает всех тренеров.</summary>
-    Task<IReadOnlyList<Trainer>> GetAllAsync(CancellationToken ct = default);
+    public Task<IReadOnlyList<Trainer>> GetAllAsync(CancellationToken ct = default);
     /// <summary>Возвращает тренера по идентификатору.</summary>
-    Task<Trainer?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    public Task<Trainer?> GetByIdAsync(Guid id, CancellationToken ct = default);
     /// <summary>Добавляет тренера.</summary>
-    Task<Trainer> AddAsync(Trainer trainer, CancellationToken ct = default);
+    public Task<Trainer> AddAsync(Trainer trainer, CancellationToken ct = default);
     /// <summary>Обновляет тренера.</summary>
-    Task<bool> UpdateAsync(Guid id, Trainer trainer, CancellationToken ct = default);
+    public Task<bool> UpdateAsync(Guid id, Trainer trainer, CancellationToken ct = default);
     /// <summary>Удаляет тренера.</summary>
-    Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
+    public Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
 }

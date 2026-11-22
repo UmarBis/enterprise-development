@@ -9,14 +9,8 @@ namespace FitnessClub.Infrastructure.SqlServer;
 /// <summary>Регистрация SQL Server хранилища.</summary>
 public static class DependencyInjection
 {
-    public static IServiceCollection AddSqlServerInfrastructure(
-        this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddSqlServerInfrastructure(this IServiceCollection services)
     {
-        services.AddDbContext<FitnessClubDbContext>(options => options.UseSqlServer(
-            connectionString,
-            sql => sql.MigrationsAssembly(typeof(FitnessClubDbContext).Assembly.FullName)
-                .EnableRetryOnFailure()));
-
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<ITrainerRepository, TrainerRepository>();
         services.AddScoped<ISpecializationRepository, SpecializationRepository>();

@@ -13,13 +13,16 @@ public sealed class FitnessClubDbContext(DbContextOptions<FitnessClubDbContext> 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Person>().UseTpcMappingStrategy();
+        modelBuilder.Entity<Person>(entity =>
+        {
+            entity.UseTpcMappingStrategy();
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).ValueGeneratedNever();
+        });
 
         modelBuilder.Entity<Client>(entity =>
         {
             entity.ToTable("Clients");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).ValueGeneratedNever();
             entity.Property(x => x.PassportNumber).HasMaxLength(20).IsRequired();
             entity.HasIndex(x => x.PassportNumber).IsUnique();
             entity.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
@@ -32,8 +35,6 @@ public sealed class FitnessClubDbContext(DbContextOptions<FitnessClubDbContext> 
         modelBuilder.Entity<Trainer>(entity =>
         {
             entity.ToTable("Trainers");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).ValueGeneratedNever();
             entity.Property(x => x.PassportNumber).HasMaxLength(20).IsRequired();
             entity.HasIndex(x => x.PassportNumber).IsUnique();
             entity.Property(x => x.FirstName).HasMaxLength(100).IsRequired();

@@ -6,13 +6,13 @@ namespace FitnessClub.Domain.Repositories;
 public interface IClientRepository
 {
     /// <summary>Возвращает всех клиентов.</summary>
-    Task<IReadOnlyList<Client>> GetAllAsync(CancellationToken ct = default);
+    public Task<IReadOnlyList<Client>> GetAllAsync(CancellationToken ct = default);
     /// <summary>Возвращает клиента по идентификатору.</summary>
-    Task<Client?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    public Task<Client?> GetByIdAsync(Guid id, CancellationToken ct = default);
     /// <summary>Добавляет клиента.</summary>
-    Task<Client> AddAsync(Client client, CancellationToken ct = default);
+    public Task<Client> AddAsync(Client client, CancellationToken ct = default);
     /// <summary>Обновляет клиента.</summary>
-    Task<bool> UpdateAsync(Guid id, Client client, CancellationToken ct = default);
+    public Task<bool> UpdateAsync(Guid id, Client client, CancellationToken ct = default);
     /// <summary>Удаляет клиента.</summary>
-    Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
+    public Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
 }

@@ -10,8 +10,8 @@ namespace FitnessClub.Domain.Seeds;
 /// </summary>
 public static class ClubDataSeeder
 {
-    /// <summary>Детерминированный идентификатор по номеру (для воспроизводимых тестов).</summary>
-    private static Guid G(int n) => Guid.Parse($"00000000-0000-0000-0000-{n:D12}");
+    /// <summary>Детерминированный непустой идентификатор по номеру (для воспроизводимых тестов).</summary>
+    private static Guid G(int n) => Guid.Parse($"35a00000-0000-4000-8000-{n:D12}");
 
     /// <summary>Длительность одного занятия (для проверки доступности зала).</summary>
     public static TimeSpan SessionDuration => TimeSpan.FromHours(1);
